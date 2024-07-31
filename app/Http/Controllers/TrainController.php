@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Train;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class TrainController extends Controller
 {
@@ -34,32 +35,46 @@ class TrainController extends Controller
 
     public function store(Request $request)
     {
+        /* mi serve per la data corrente */
+        $currentData = Carbon::today()->toDateString();
 
-        Train::updateOrCreate(
-            [
-                'TrainNumber' => $request->input('TrainNumber'),
+        /* Cerca un record con il TrainNumber e created_at uguale a oggi */
+        $train = Train::where('TrainNumber', $request->input('TrainNumber'))
+        ->whereDate('created_at', $currentData)
+        ->first();
+
+        if ($train) {
+
+            $train->update([
                 'DepartureDate' => $request->input('DepartureDate'),
-            ],
-            [
                 'DepartureStationDescription' => $request->input('DepartureStationDescription'),
                 'ArrivalStationDescription' => $request->input('ArrivalStationDescription'),
                 'ArrivalDate' => $request->input('ArrivalDate'),
-            ]
-        );
+            ]);
+        } else {
 
+            Train::create([
+                'TrainNumber' => $request->input('TrainNumber'),
+                'DepartureDate' => $request->input('DepartureDate'),
+                'DepartureStationDescription' => $request->input('DepartureStationDescription'),
+                'ArrivalStationDescription' => $request->input('ArrivalStationDescription'),
+                'ArrivalDate' => $request->input('ArrivalDate'),
+            ]);
+        }
+
+        }
+
+        public function destroy(Train $train)
+        {
+            $train->delete();
+
+            return redirect()->route('save.trains')->with('success', 'Treno eliminato con successo.');
+        }
+
+        public function deleteAll(Train $train)
+        {
+            $train->truncate();
+
+            return redirect()->route('save.trains')->with('success', 'Treni eliminati con successo.');
+        }
     }
-
-    public function destroy(Train $train)
-    {
-        $train->delete();
-
-        return redirect()->route('save.trains')->with('success', 'Treno eliminato con successo.');
-    }
-
-    public function deleteAll(Train $train)
-    {
-        $train->truncate();
-
-        return redirect()->route('save.trains')->with('success', 'Treni eliminati con successo.');
-    }
-}
