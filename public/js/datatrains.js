@@ -1,8 +1,8 @@
 
-function updateData(){
-    fetch('/TrainStatus')
-    .then(response => response.json())
-    .then(data => {
+async function updateData(){
+    try {
+        const response = await fetch('/TrainStatus');
+        const data = await response.json();
 
         const lastUpdateElement = document.getElementById('lastUpdate');
         const trainsContainer = document.getElementById('trains');
@@ -60,9 +60,13 @@ function updateData(){
             });
 
         }
-    })
 
-    .catch(error => console.error('Errore:', error));
+    } catch (error) {
+
+        console.log('Errore nel try');
+
+    }
+
 }
 
 function saveTrainData(train) {
@@ -76,8 +80,8 @@ function saveTrainData(train) {
     })
 }
 
-window.setTimeout(function() {
-    window.location.reload();
-}, 60000);
-
-window.onload = updateData;
+// appena carichi pagina parte la funzione updateData
+window.onload = function() {
+    updateData(); // viene eseguita
+    setInterval(updateData, 60000); // eseguita ogni 60 secondi
+};
