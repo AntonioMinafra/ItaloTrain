@@ -13,22 +13,23 @@ class TrainController extends Controller
     {
         $query = Train::query();
 
+        /* se la richiesta contiente un parametro di data di creazione allora li seleziono */
         if ($request->has('creation_date') && $request->creation_date != '') {
             $query->whereDate('created_at', $request->creation_date);
         }
 
+        /* se la richiesta contiente un parametro di numero del treno allora li seleziono */
         if ($request->has('train_number') && $request->train_number != '') {
             $query->where('TrainNumber', $request->train_number);
         }
 
+        /* ordino i risultati in base alle partenze e all'orario di salvataggio in modo decrescente e gli faccio la paginazione di 10 e poi mantengo i dati per gestirli nella paginazione */
         $trains = $query->OrderBy('DepartureDate', 'desc')
         ->orderBy('created_at', 'desc')
         ->paginate(10)
         ->appends($request->all());;
 
         $trains_id = $trains['id'];
-
-        echo $trains_id;
 
         return view('savetrains.index', ['trains' => $trains , '$trains_id' => $trains_id]);
     }
