@@ -15,6 +15,22 @@ class CustomCors
      */
     public function handle(Request $request, Closure $next): Response
     {
-        return $next($request);
+        $origin = env('FRONTEND_URL', 'http://localhost:8000');
+
+        if ($request->getMethod() === 'OPTIONS') {
+            $response = response('', 200);
+            $response->headers->set('Access-Control-Allow-Origin', $origin);
+            $response->headers->set('Access-Control-Allow-Methods', 'GET, POST');
+            $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, X-CSRF-TOKEN, X-Requested-With, Authorization');
+            return $response;
+        }
+
+        $response = $next($request);
+
+        $response->headers->set('Access-Control-Allow-Origin', $origin);
+        $response->headers->set('Access-Control-Allow-Methods', 'GET, POST');
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, X-CSRF-TOKEN, X-Requested-With, Authorization');
+
+        return $response;
     }
 }
